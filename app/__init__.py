@@ -28,6 +28,13 @@ def create_app(config_name='default'):
     socketio.init_app(app, cors_allowed_origins="*", async_mode='threading')
     jwt.init_app(app)
     CORS(app)
+
+    # --- MODIFICATION ---
+    # We import the models here to ensure they are registered with SQLAlchemy
+    # BEFORE any blueprint or API namespace that might use them is imported.
+    # This prevents circular import errors.
+    from app.models import user, project, task, comment, project_member
+    # --- FIN DE LA MODIFICATION ---
     
     # Initialize API with Swagger documentation
     api = Api(
@@ -75,9 +82,6 @@ def create_app(config_name='default'):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(projects_bp, url_prefix='/projects')
     app.register_blueprint(tasks_bp, url_prefix='/tasks')
-    
-    # Import models to ensure they are registered with SQLAlchemy
-    from app.models import user, project, task, comment, project_member
     
     # Register WebSocket events
     from app.websocket import events
